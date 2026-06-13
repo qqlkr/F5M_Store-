@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر F5M Store</title>
+    <title>{{ page.title }} - F5M Store</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { 
@@ -24,7 +24,7 @@
             border-bottom: 1px solid #2c2c2e; 
         }
         .header-bar h1 { margin: 0; font-size: 20px; color: #fff; font-weight: bold; }
-        .cart-icon-btn { color: #ff3b30; font-size: 22px; text-decoration: none; position: relative; }
+        .cart-icon-btn { color: #ff3b30; font-size: 22px; text-decoration: none; }
         
         /* شريط الأقسام والصفحات الفرعية التلقائي */
         .nav-categories {
@@ -34,9 +34,9 @@
             gap: 10px;
             overflow-x: auto;
             border-bottom: 1px solid #2c2c2e;
-            scrollbar-width: none; /* إخفاء شريط التمرير في فايرفوكس */
+            scrollbar-width: none;
         }
-        .nav-categories::-webkit-scrollbar { display: none; /* إخفاء شريط التمرير في كروم وسفاري */ }
+        .nav-categories::-webkit-scrollbar { display: none; }
         
         .nav-link {
             background: #2c2c2e;
@@ -55,6 +55,14 @@
             color: #fff;
             border-color: #ff3b30;
         }
+
+        /* عنوان ووصف القسم الحالي */
+        .category-header {
+            padding: 20px 15px 5px 15px;
+            text-align: right;
+        }
+        .category-header h2 { margin: 0 0 5px 0; font-size: 22px; color: #ff3b30; }
+        .category-header p { margin: 0; font-size: 13px; color: #aeaeb2; }
 
         /* شبكة كروت سلة الثنائية المتجاوبة */
         .products-grid { 
@@ -143,10 +151,15 @@
 </div>
 
 <div class="nav-categories">
-    <a href="/" class="nav-link active">الرئيسية</a>
-    {% for page in custom_pages %}
-        <a href="/page/{{ page._id }}" class="nav-link">{{ page.title }}</a>
+    <a href="/" class="nav-link">الرئيسية</a>
+    {% for p in custom_pages %}
+        <a href="/page/{{ p._id }}" class="nav-link {% if p._id|string == page._id|string %}active{% endif %}">{{ p.title }}</a>
     {% endfor %}
+</div>
+
+<div class="category-header">
+    <h2>{{ page.title }}</h2>
+    <p>{{ page.content }}</p>
 </div>
 
 <div class="products-grid">
@@ -171,32 +184,24 @@
     </div>
     {% else %}
     <div style="grid-column: span 2; text-align: center; color: #8e8e93; padding: 40px 10px;">
-        لا توجد منتجات معروضة في القسم الرئيسي حالياً.
+        لا توجد منتجات معروضة في هذا القسم حالياً.
     </div>
     {% endfor %}
 </div>
 
 <script>
-// وظيفة إضافة المنتجات إلى سلة المشتريات المحلية
 function addToCart(id, name, price) {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     let found = cart.find(item => item.id === id);
-    if (found) { 
-        found.quantity += 1; 
-    } else { 
-        cart.push({ id: id, name: name, price: price, quantity: 1 }); 
-    }
+    if (found) { found.quantity += 1; } else { cart.push({ id: id, name: name, price: price, quantity: 1 }); }
     localStorage.setItem("cart", JSON.stringify(cart));
     alert("تم إضافة المنتج إلى السلة بنجاح! 🛒");
 }
 
-// وظيفة الشراء السريع والانتقال المباشر للسلة لإنهاء الدفع
 function quickBuy(id, name, price) {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     let found = cart.find(item => item.id === id);
-    if (!found) { 
-        cart.push({ id: id, name: name, price: price, quantity: 1 }); 
-    }
+    if (!found) { cart.push({ id: id, name: name, price: price, quantity: 1 }); }
     localStorage.setItem("cart", JSON.stringify(cart));
     window.location.href = "/cart";
 }

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - F5M Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #121212; 
+            color: #fff; 
+            margin: 0; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .login-card {
+            background: #1c1c1e;
+            border: 1px solid #2c2c2e;
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .login-card h2 { margin: 0 0 10px 0; font-size: 24px; color: #fff; }
+        .login-card p { margin: 0 0 25px 0; font-size: 14px; color: #aeaeb2; line-height: 1.5; }
+        
+        .btn-discord {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #5865F2;
+            color: white;
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+        .btn-discord:hover { background: #4752c4; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <h2>مرحباً بك في F5M Store</h2>
+    <p>لتتمكن من تصفح وشراء أقراص الحماية والاشتراكات الفاخرة، يرجى تسجيل الدخول السريع عبر حسابك في ديسكورد.</p>
+    <a href="{{ login_url }}" class="btn-discord">
+        <i class="fa-brands fa-discord" style="font-size: 18px;"></i> تسجيل الدخول بواسطة ديسكورد
+    </a>
+</div>
+
+</body>
+</html>

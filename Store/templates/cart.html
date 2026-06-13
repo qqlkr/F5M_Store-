@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سلة المشتريات - F5M Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #121212; 
+            color: #fff; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .cart-container { max-width: 600px; margin: 0 auto; }
+        .cart-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #ff3b30; text-align: center; }
+        
+        .cart-item {
+            background: #1c1c1e;
+            border: 1px solid #2c2c2e;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-details h3 { margin: 0 0 5px 0; font-size: 15px; }
+        .item-details p { margin: 0; color: #aeaeb2; font-size: 13px; }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #2c2c2e;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .btn-qty {
+            background: transparent; border: none; color: #fff;
+            font-size: 16px; cursor: pointer; padding: 2px 6px;
+        }
+        .qty-val { font-size: 14px; font-weight: bold; min-width: 15px; text-align: center; }
+        .btn-remove { background: transparent; border: none; color: #ff3b30; font-size: 16px; cursor: pointer; }
+        
+        .coupon-section {
+            background: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 12px;
+            padding: 15px; margin-top: 20px; display: flex; gap: 10px;
+        }
+        .coupon-section input {
+            flex: 1; background: #2c2c2e; border: 1px solid #3a3a3c;
+            border-radius: 8px; padding: 10px; color: #fff; font-size: 14px;
+        }
+        .btn-coupon { background: #ff3b30; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        .summary-card {
+            background: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 12px;
+            padding: 20px; margin-top: 15px;
+        }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .total-row { font-size: 18px; font-weight: bold; color: #00b074; border-top: 1px solid #2c2c2e; padding-top: 10px; margin-top: 10px; }
+        
+        .btn-checkout {
+            width: 100%; padding: 14px; background: #00b074; color: white;
+            border: none; border-radius: 8px; font-size: 15px; font-weight: bold;
+            margin-top: 15px; cursor: pointer;
+        }
+        
+        /* تصميم النافذة المنبثقة Modal */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999;
+        }
+        .modal-content {
+            background: #1c1c1e; border: 1px solid #2c2c2e; width: 90%; max-width: 450px;
+            padding: 20px; border-radius: 16px; text-align: right; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #ff3b30; text-align: center; }
+        .bank-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .bank-tab {
+            flex: 1; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;
+            border: 1px solid #3a3a3c; background: #2c2c2e; font-size: 13px; font-weight: 500;
+        }
+        .bank-tab.active { border-color: #00b074; background: rgba(0, 176, 116, 0.1); color: #00b074; }
+        .bank-info-box { background: #2c2c2e; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; line-height: 1.6; }
+        
+        /* مظهر مخصص واحترافي لزر رفع وإرفاق الملف */
+        .file-upload-wrapper {
+            position: relative; margin-bottom: 15px;
+        }
+        .input-file-real {
+            width: 100%; padding: 12px; background: #2c2c2e; border: 1px solid #3a3a3c;
+            border-radius: 8px; color: #fff; font-size: 13px; cursor: pointer;
+        }
+        
+        .btn-modal-submit { width: 100%; padding: 12px; background: #00b074; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-modal-close { background: transparent; border: none; color: #aeaeb2; display: block; margin: 10px auto 0 auto; cursor: pointer; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="cart-container">
+    <div class="cart-title"><i class="fa-solid fa-basket-shopping"></i> سلة مشترياتك</div>
+    
+    <div id="cart-items-wrapper"></div>
+    
+    <div class="coupon-section">
+        <input type="text" id="coupon-code" placeholder="هل لديك كود تخفيض؟">
+        <button class="btn-coupon" onclick="applyCoupon()">تطبيق</button>
+    </div>
+    
+    <div class="summary-card">
+        <div class="summary-row"><span>إجمالي المنتجات:</span><span id="subtotal">0 ﷼</span></div>
+        <div class="summary-row" id="discount-row" style="display: none; color: #ff9500;"><span>الخصم المطبق:</span><span id="discount-val">0%</span></div>
+        <div class="summary-row total-row"><span>المبلغ الإجمالي النهائى:</span><span id="grand-total">0 ﷼</span></div>
+    </div>
+    
+    <button class="btn-checkout" onclick="openPaymentModal()">تأكيد الطلب واختيار حساب الدفع</button>
+    <a href="/" style="display:block; text-align:center; margin-top:15px; color:#aeaeb2; text-decoration:none; font-size:13px;"><i class="fa-solid fa-arrow-right"></i> العودة للمتجر</a>
+</div>
+
+<div class="modal" id="paymentModal">
+    <div class="modal-content">
+        <div class="modal-title"><i class="fa-solid fa-building-columns"></i> تفاصيل الحساب والتحويل البنكي</div>
+        
+        <div class="bank-tabs">
+            <div class="bank-tab active" id="tab-alrajhi" onclick="switchBank('AlRajhi')">مصرف الراجحي</div>
+            <div class="bank-tab" id="tab-stc" onclick="switchBank('STC')">STC Bank</div>
+        </div>
+
+        <div class="bank-info-box" id="bank-info-content">
+            <strong>اسم الحساب:</strong> <span id="lbl-holder">جاري التحميل...</span><br>
+            <strong>رقم الآيبان IBAN:</strong> <span id="lbl-iban" style="font-family: monospace; letter-spacing: 0.5px;">جاري التحميل...</span>
+        </div>
+
+        <label style="font-size: 12px; color: #aeaeb2; display: block; margin-bottom: 8px;"><i class="fa-solid fa-paperclip"></i> إرفاق ملف صورة الإيصال:</label>
+        <div class="file-upload-wrapper">
+            <input type="file" class="input-file-real" id="file-receipt" accept="image/*" required>
+        </div>
+
+        <button class="btn-modal-submit" onclick="finalizeOrder()">إرسال الطلب وتأكيد عملية التحويل</button>
+        <button class="btn-modal-close" onclick="closePaymentModal()">إلغاء وإغلاق النافذة</button>
+    </div>
+</div>
+
+<script>
+let discountPercent = 0;
+let selectedBank = 'AlRajhi';
+const bankDetails = {{ bank_details|tojson }};
+
+function displayCart() {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let wrapper = document.getElementById("cart-items-wrapper");
+    if(cart.length === 0) {
+        wrapper.innerHTML = `<div style="text-align:center; color:#8e8e93; padding:30px;">السلة فارغة حالياً.</div>`;
+        updateSummary(0);
+        return;
+    }
+    
+    let html = "";
+    let subtotal = 0;
+    cart.forEach((item, index) => {
+        subtotal += (item.price * item.quantity);
+        html += `
+        <div class="cart-item">
+            <div class="item-details">
+                <h3>${item.name}</h3>
+                <p>السعر الفردي: ${item.price} ﷼</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="quantity-control">
+                    <button class="btn-qty" onclick="changeQty(${index}, -1)">-</button>
+                    <span class="qty-val">${item.quantity}</span>
+                    <button class="btn-qty" onclick="changeQty(${index}, 1)">+</button>
+                </div>
+                <button class="btn-remove" onclick="removeItem(${index})"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+        </div>`;
+    });
+    wrapper.innerHTML = html;
+    updateSummary(subtotal);
+}
+
+function changeQty(index, amount) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart[index].quantity += amount;
+    if(cart[index].quantity <= 0) {
+        cart.splice(index, 1);
+    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    displayCart();
+}
+
+function removeItem(index) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.splice(index, 1);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    displayCart();
+}
+
+function updateSummary(subtotal) {
+    document.getElementById("subtotal").innerText = subtotal + " ﷼";
+    let discountAmount = subtotal * (discountPercent / 100);
+    let finalTotal = subtotal - discountAmount;
+    document.getElementById("grand-total").innerText = finalTotal.toFixed(2) + " ﷼";
+}
+
+function applyCoupon() {
+    let code = document.getElementById("coupon-code").value;
+    if(!code) return alert("الرجاء كتابة رمز الكوبون!");
+    fetch("/validate-coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code })
+    }).then(res => res.json()).then(data => {
+        if(data.valid) {
+            discountPercent = data.discount;
+            document.getElementById("discount-row").style.display = "flex";
+            document.getElementById("discount-val").innerText = discountPercent + "%";
+            displayCart();
+        } else {
+            alert(data.message);
+        }
+    });
+}
+
+function openPaymentModal() {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    if(cart.length === 0) return alert("سلتك فارغة لا توجد منتجات لتأكيدها!");
+    switchBank('AlRajhi');
+    document.getElementById("paymentModal").style.display = "flex";
+}
+
+function closePaymentModal() {
+    document.getElementById("paymentModal").style.display = "none";
+}
+
+function switchBank(bankKey) {
+    selectedBank = bankKey;
+    document.getElementById("tab-alrajhi").classList.toggle("active", bankKey === 'AlRajhi');
+    document.getElementById("tab-stc").classList.toggle("active", bankKey === 'STC');
+    
+    document.getElementById("lbl-holder").innerText = bankDetails[bankKey].holder;
+    document.getElementById("lbl-iban").innerText = bankDetails[bankKey].iban;
+}
+
+function finalizeOrder() {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let fileInput = document.getElementById("file-receipt");
+    let grandTotal = document.getElementById("grand-total").innerText;
+    
+    if(fileInput.files.length === 0) {
+        return alert("يرجى إرفاق ملف صورة الإيصال البنكي أولاً لإتمام طلبك!");
+    }
+
+    // بناء كائن FormData لإرسال الملفات والبيانات معاً
+    let formData = new FormData();
+    formData.append("receipt_file", fileInput.files[0]);
+    formData.append("items", JSON.stringify(cart));
+    formData.append("total", grandTotal);
+    formData.append("bank_type", selectedBank);
+
+    fetch("/submit-bank-order", {
+        method: "POST",
+        body: formData // يرسل تلقائياً بصيغة multipart/form-data
+    }).then(res => res.json()).then(data => {
+        if(data.success) {
+            localStorage.removeItem("cart");
+            closePaymentModal();
+            alert("تم رفع الإيصال، ، وحجز طلبك بنجاح! جاري فتح الواتساب لإعلام الإدارة.");
+            window.location.href = data.url;
+        } else {
+            alert(data.message);
+        }
+    }).catch(err => {
+        alert("حدث خطأ أثناء رفع الملف، يرجى المحاولة مرة أخرى.");
+    });
+}
+
+document.addEventListener("DOMContentLoaded", displayCart);
+</script>
+</body>
+</html>

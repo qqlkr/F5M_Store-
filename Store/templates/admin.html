@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - F5M Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        .admin-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2c2c2e;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .admin-header h1 { margin: 0; font-size: 24px; color: #ff0055; }
+        .btn-logout {
+            background: #ff3b30; color: white; padding: 8px 16px;
+            text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;
+        }
+        
+        /* تصميم الأقسام والبطاقات */
+        .admin-section {
+            background: #1c1c1e;
+            border: 1px solid #2c2c2e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .admin-section h2 {
+            margin-top: 0;
+            font-size: 18px;
+            border-bottom: 1px solid #2c2c2e;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: #00b074;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* الجداول الافتراضية للطلبات والبيانات */
+        .table-responsive { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            text-align: right;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #2c2c2e;
+            font-size: 14px;
+        }
+        th { background: #2c2c2e; color: #aeaeb2; }
+        
+        /* أزرار الحالات والإجراءات */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-warning { background: #ff9500; color: #fff; }
+        .badge-success { background: #34c759; color: #fff; }
+        .badge-danger { background: #ff3b30; color: #fff; }
+        
+        .btn-action {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-block;
+            margin-left: 5px;
+        }
+        .btn-approve { background: #34c759; color: #fff; }
+        .btn-reject { background: #ff3b30; color: #fff; }
+        .btn-delete { background: #ff3b30; color: white; }
+        
+        /* نماذج الإدخال والفورم */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label {
+            font-size: 13px;
+            color: #aeaeb2;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            background: #2c2c2e;
+            border: 1px solid #3a3a3c;
+            border-radius: 6px;
+            padding: 10px;
+            color: #fff;
+            font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #00b074;
+            outline: none;
+        }
+        .btn-submit {
+            background: #00b074;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-submit:hover { background: #009662; }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    
+    <!-- الهيدر العلوي -->
+    <div class="admin-header">
+        <h1>لوحة تحكم إدارة المتجر</h1>
+        <a href="/logout" class="btn-logout"><i class="fa-solid fa-sign-out-alt"></i> تسجيل الخروج</a>
+    </div>
+
+    <!-- 1️⃣ قسم مراجعة طلبات التحويل البنكي وإيصالات المشتريات -->
+    <div class="admin-section">
+        <h2><i class="fa-solid fa-receipt"></i> طلبات التحويل بانتظار المراجعة</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>العميل (ديسكورد)</th>
+                        <th>الحساب المحول له</th>
+                        <th>المبلغ الإجمالي</th>
+                        <th>الإيصال المرفوع</th>
+                        <th>الحالة الحالية</th>
+                        <th>الإجراءات سريعة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <strong>{{ order.user.username }}</strong><br>
+                            <span style="font-size: 11px; color: #8e8e93;">ID: {{ order.user.discord_id }}</span>
+                        </td>
+                        <td>
+                            {% if order.bank_type == 'AlRajhi' %}
+                                <span style="color: #0066cc; font-weight: bold;">مصرف الراجحي</span>
+                            {% else %}
+                                <span style="color: #ff0055; font-weight: bold;">STC Bank</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-weight: bold; color: #34c759;">{{ order.total }} ﷼</td>
+                        <td>
+                            <a href="{{ order.receipt_url }}" target="_blank" style="color: #0a84ff; text-decoration: underline; font-weight: 500;">
+                                <i class="fa-solid fa-image"></i> عرض إيصال العميل
+                            </a>
+                        </td>
+                        <td>
+                            {% if order.status == 'بانتظار المراجعة' %}
+                                <span class="badge badge-warning">{{ order.status }}</span>
+                            {% elif order.status == 'تم الاعتماد والشحن' %}
+                                <span class="badge badge-success">{{ order.status }}</span>
+                            {% else %}
+                                <span class="badge badge-danger">{{ order.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if order.status == 'بانتظار المراجعة' %}
+                                <a href="/update-order/{{ order._id }}/تم الاعتماد والشحن" class="btn-action btn-approve">قبول واعتماد</a>
+                                <a href="/update-order/{{ order._id }}/تم الرفض" class="btn-action btn-reject">رفض الإيصال</a>
+                            {% else %}
+                                <span style="color: #666; font-size: 12px;">مكتمل</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #666; padding: 20px;">لا توجد أي طلبات تحويل جديدة لمراجعتها حالياً.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2️⃣ قسم إضافة منتج جديد للمتجر -->
+    <div class="admin-section">
+        <h2><i class="fa-solid fa-box-open"></i> إضافة منتج جديد للمتجر</h2>
+        <form action="/add-product" method="POST">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>اسم المنتج</label>
+                    <input type="text" name="name" placeholder="مثال: بريميوم قولف بوت" required>
+                </div>
+                <div class="form-group">
+                    <label>سعر المنتج (﷼)</label>
+                    <input type="number" step="0.01" name="price" placeholder="مثال: 75" required>
+                </div>
+                <div class="form-group">
+                    <label>رابط صورة المنتج</label>
+                    <input type="url" name="image" placeholder="https://..." required>
+                </div>
+                <div class="form-group">
+                    <label>الكمية المتوفرة</label>
+                    <input type="number" name="quantity" value="10" required>
+                </div>
+                <div class="form-group">
+                    <label>مكان العرض (الصفحة)</label>
+                    <select name="page_id">
+                        <option value="main">الصفحة الرئيسية للمتجر</option>
+                        {% for page in custom_pages %}
+                            <option value="{{ page._id }}">{{ page.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>وصف المنتج بالتفصيل</label>
+                <textarea name="description" rows="3" placeholder="اكتب تفاصيل ومميزات المنتج المشتري هنا..." required></textarea>
+            </div>
+            <button type="submit" class="btn-submit"><i class="fa-solid fa-plus"></i> إضافة المنتج الآن</button>
+        </form>
+    </div>
+
+    <!-- 3️⃣ قسم إدارة المنتجات الحالية الحذف والتعديل -->
+    <div class="admin-section">
+        <h2><i class="fa-solid fa-boxes-stacked"></i> قائمة المنتجات المعروضة بالمتجر</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الصورة</th>
+                        <th>اسم المنتج</th>
+                        <th>السعر</th>
+                        <th>الكمية المتبقية</th>
+                        <th>الموقع</th>
+                        <th>حذف</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td><img src="{{ product.image }}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;"></td>
+                        <td><strong>{{ product.name }}</strong></td>
+                        <td>{{ product.price }} ﷼</td>
+                        <td>{{ product.quantity }} قطعة</td>
+                        <td>
+                            {% if product.page_id == 'main' %}
+                                الرئيسية
+                            {% else %}
+                                قسم فرعي
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/delete-product/{{ product._id }}" class="btn-action btn-delete" onclick="return confirm('هل أنت متأكد من رغبتك بحذف هذا المنتج نهائياً؟')">
+                                <i class="fa-solid fa-trash-can"></i> حذف
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 4️⃣ قسم إضافة الأقسام والصفحات الفرعية المخصصة للمتجر -->
+    <div class="admin-section">
+        <h2><i class="fa-solid fa-folder-plus"></i> إنشاء وتعديل الأقسام والصفحات الفرعية</h2>
+        <form action="/add-page" method="POST" style="margin-bottom: 20px;">
+            <div class="form-grid" style="grid-template-columns: 1fr 2fr;">
+                <div class="form-group">
+                    <label>عنوان القسم الجديد</label>
+                    <input type="text" name="title" placeholder="مثال: اشتراكات الحماية" required>
+                </div>
+                <div class="form-group">
+                    <label>وصف توضيحي مختصر للقسم</label>
+                    <input type="text" name="content" placeholder="اكتب نبذة تظهر للعملاء في أعلى الصفحة الفرعية" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit"><i class="fa-solid fa-folder-plus"></i> إنشاء القسم الآن</button>
+        </form>
+
+        <h3 style="font-size: 15px; color: #aeaeb2; margin-bottom: 10px;">الأقسام والصفحات النشطة حالياً:</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم القسم والصفحة</th>
+                        <th>الوصف المدرج</th>
+                        <th>الرابط المباشر للمعاينة</th>
+                        <th>حذف</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for page in custom_pages %}
+                    <tr>
+                        <td><strong>{{ page.title }}</strong></td>
+                        <td>{{ page.content }}</td>
+                        <td><a href="/page/{{ page._id }}" target="_blank" style="color: #0a84ff;">/page/{{ page._id }} 🔗</a></td>
+                        <td>
+                            <a href="/delete-page/{{ page._id }}" class="btn-action btn-delete" onclick="return confirm('حذف هذا القسم سيؤدي لإعادة المنتجات التابعة له للصفحة الرئيسية، هل تود الحذف؟')">حذف القسم</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5️⃣ قسم الكوبونات وأكواد التخفيض المتقدمة -->
+    <div class="admin-section">
+        <h2><i class="fa-solid fa-ticket"></i> نظام الكوبونات وأكواد التخفيض</h2>
+        <form action="/add-coupon" method="POST" style="margin-bottom: 25px;">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>رمز الكوبون (الرمز السري)</label>
+                    <input type="text" name="code" placeholder="مثال: F5M" style="text-transform: uppercase;" required>
+                </div>
+                <div class="form-group">
+                    <label>نسبة الخصم المئوية (%)</label>
+                    <input type="number" name="discount" min="1" max="100" placeholder="مثال: 15" required>
+                </div>
+                <div class="form-group">
+                    <label>تاريخ بداية الصلاحية (اختياري)</label>
+                    <input type="datetime-local" name="start_date">
+                </div>
+                <div class="form-group">
+                    <label>تاريخ نهاية الصلاحية (اختياري)</label>
+                    <input type="datetime-local" name="end_date">
+                </div>
+            </div>
+            <button type="submit" class="btn-submit"><i class="fa-solid fa-plus"></i> تفعيل وحفظ الكوبون</button>
+        </form>
+
+        <h3 style="font-size: 15px; color: #aeaeb2; margin-bottom: 10px;">الكوبونات الفعالة داخل النظام:</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>كود الخصم</th>
+                        <th>نسبة التخفيض</th>
+                        <th>تاريخ البدء</th>
+                        <th>تاريخ الانتهاء</th>
+                        <th>إزالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for coupon in coupons %}
+                    <tr>
+                        <td><span style="background: #2c2c2e; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-weight: bold; letter-spacing: 1px;">{{ coupon.code }}</span></td>
+                        <td style="font-weight: bold; color: #ff9500;">{{ coupon.discount }}% خصم</td>
+                        <td>{{ coupon.start_date if coupon.start_date else 'مفعل فوراً' }}</td>
+                        <td>{{ coupon.end_date if coupon.end_date else 'غير محدد بوقت' }}</td>
+                        <td>
+                            <a href="/delete-coupon/{{ coupon._id }}" class="btn-action btn-delete"><i class="fa-solid fa-trash"></i> حذف</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #666; padding: 15px;">لا توجد أكواد خصم نشطة حالياً.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

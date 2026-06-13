@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} - F5M Store</title>
+    <style>
+        body { font-family: sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 0; text-align: right; }
+        .detail-container { max-width: 500px; margin: 0 auto; background: #1c1c1e; min-height: 100vh; display: flex; flex-direction: column; }
+        .back-btn { padding: 15px; color: #fff; text-decoration: none; display: inline-block; font-size: 18px; }
+        .product-img { width: 100%; object-fit: cover; max-height: 350px; }
+        .info-section { padding: 20px; flex-grow: 1; }
+        .product-title { font-size: 20px; font-weight: bold; margin: 10px 0; line-height: 1.4; }
+        .stats-row { color: #ff3b30; font-size: 13px; margin: 10px 0; }
+        .stars { color: #ffcc00; margin-bottom: 15px; }
+        .desc { color: #aeaeb2; font-size: 14px; line-height: 1.6; border-top: 1px solid #2c2c2e; padding-top: 15px; margin-top: 15px; }
+        .action-bar { position: sticky; bottom: 0; background: #1c1c1e; padding: 15px; border-top: 1px solid #2c2c2e; display: flex; flex-direction: column; gap: 10px; }
+        .btn-buy { background: #00b074; color: #fff; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; text-align: center; }
+        .btn-cart { background: transparent; color: #ff3b30; border: 1px solid #ff3b30; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="detail-container">
+    <a href="/" class="back-btn">✕ رجوع</a>
+    <img class="product-img" src="{{ product.image }}" alt="{{ product.name }}">
+    
+    <div class="info-section">
+        <h1 class="product-title">{{ product.name }}</h1>     
+        <div class="stars">⭐⭐⭐⭐⭐ <span style="color: #8e8e93; font-size: 12px;">(تقييم واحد)</span></div>
+        <div style="font-size: 24px; font-weight: bold; margin-bottom: 15px;">{{ product.price }} ﷼</div>
+        <div class="desc">{{ product.description }}</div>
+    </div>
+
+    <div class="action-bar">
+        <button class="btn-buy" onclick="quickBuy('{{ product._id }}', '{{ product.name }}', {{ product.price }})">شراء الآن</button>
+        <button class="btn-cart" onclick="addToCart('{{ product._id }}', '{{ product.name }}', {{ product.price }})">إضافة للسلة</button>
+    </div>
+</div>
+
+<script>
+function addToCart(id, name, price) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let found = cart.find(item => item.id === id);
+    if (found) { found.quantity += 1; } else { cart.push({ id: id, name: name, price: price, quantity: 1 }); }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("تم إضافة المنتج إلى السلة بنجاح! 🛒");
+}
+
+function quickBuy(id, name, price) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let found = cart.find(item => item.id === id);
+    if (!found) { cart.push({ id: id, name: name, price: price, quantity: 1 }); }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    window.location.href = "/cart";
+}
+</script>
+</body>
+</html>
